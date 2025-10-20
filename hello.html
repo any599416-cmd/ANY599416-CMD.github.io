@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪映会员 SMS 界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #fff;
+        }
+        /* VIP信息区样式 */
+        .vip-section {
+            background-color: #3674ff;
+            color: #fff;
+            padding: 15px;
+        }
+        .vip-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .vip-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #e0efff;
+        }
+        /* 公告区样式 */
+        .notice-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .notice-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .notice-icon {
+            color: #3674ff;
+            margin-right: 8px;
+        }
+        .notice-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .notice-content {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .notice-link {
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+        }
+        /* 手机号区样式 */
+        .phone-section {
+            padding: 15px;
+        }
+        .phone-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .phone-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .phone-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #999;
+            background-color: #f5f5f5;
+        }
+        .get-btn {
+            background-color: #3674ff;
+            color: #fff;
+            border: none;
+            padding: 0 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        /* 提示区样式 */
+        .tips-section {
+            background-color: #f7f9ff;
+            border: 1px solid #e0efff;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .tips-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .tips-icon {
+            color: #3674ff;
+            margin-right: 8px;
+        }
+        .tips-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .tips-list {
+            font-size: 13px;
+            color: #666;
+        }
+        .tips-list li {
+            margin-bottom: 5px;
+        }
+        /* 短信区样式 */
+        .sms-section {
+            padding: 15px;
+        }
+        .sms-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .sms-content-area {
+            background-color: #f7f9ff;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 60px; /* 空状态保持区域高度 */
+        }
+        .sms-code {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3674ff;
+        }
+        .copy-btn {
+            background-color: #999; /* 初始禁用状态 */
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: not-allowed; /* 初始禁用光标 */
+        }
+        /* 底部导航样式 */
+        .nav-bar {
+            background-color: #f5f5f5;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+        .nav-btn {
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- VIP信息区 -->
+    <div class="vip-section">
+        <div class="vip-title">剪映会员</div>
+        <div class="vip-info">
+            <span>卡密类型 天卡</span>
+            <span id="expireTime">到期时间 </span> <!-- 动态到期时间 -->
+            <span id="remainingTimes">剩余次数 1</span> <!-- 剩余次数 -->
+        </div>
+    </div>
+
+    <!-- 公告区 -->
+    <div class="notice-section">
+        <div class="notice-header">
+            <span class="notice-icon">🔔</span>
+            <span class="notice-title">最新公告</span>
+        </div>
+        <div class="notice-content">剪映登录教程及常见问题</div>
+        <a href="https://sourl.cn/CrTARJ" class="notice-link" target="_blank">https://sourl.cn/CrTARJ</a>
+    </div>
+
+    <!-- 手机号区 -->
+    <div class="phone-section">
+        <div class="phone-title">手机号码</div>
+        <div class="phone-input-area">
+            <input type="text" class="phone-input" id="phoneInput" placeholder="请先获取号码" readonly>
+            <button class="get-btn" id="getPhoneBtn">获取/更换</button>
+        </div>
+        <!-- 温馨提示 -->
+        <div class="tips-section">
+            <div class="tips-header">
+                <span class="tips-icon">ℹ️</span>
+                <span class="tips-title">温馨提示</span>
+            </div>
+            <ul class="tips-list">
+                <li>点击号码即可自动复制</li>
+                <li>刷新页面可重新继续获取验证码</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 短信内容区 -->
+    <div class="sms-section">
+        <div class="sms-title">短信内容</div>
+        <div class="sms-content-area">
+            <span class="sms-code" id="smsCode"></span> <!-- 初始为空，获取后填充验证码 -->
+            <button class="copy-btn" id="copyBtn">复制验证码</button>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="nav-bar">
+        <span class="nav-btn">＜</span>
+        <span class="nav-btn">＞</span>
+    </div>
+
+    <script>
+        // 状态变量
+        let hasGotPhone = false; // 是否已获取手机号
+        let hasGotCode = false;  // 是否已获取验证码
+        // DOM元素获取
+        const remainingTimesEl = document.getElementById('remainingTimes');
+        const expireTimeEl = document.getElementById('expireTime');
+        const smsCodeEl = document.getElementById('smsCode');
+        const copyBtnEl = document.getElementById('copyBtn');
+        const phoneInputEl = document.getElementById('phoneInput');
+        const getPhoneBtnEl = document.getElementById('getPhoneBtn');
+
+        /**
+         * 1. 设置动态到期时间（当前时间+1分钟）
+         */
+        function setDynamicExpireTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 1); // 时间加1分钟
+            // 格式化时间（补零处理）
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            // 赋值到页面
+            expireTimeEl.textContent = `到期时间 ${year}/${month}/${day} ${hour}:${minute}:${second}`;
+        }
+        // 页面加载时执行
+        setDynamicExpireTime();
+
+        /**
+         * 2. 点击“获取/更换”按钮事件
+         */
+        getPhoneBtnEl.addEventListener('click', function() {
+            // 已获取过手机号，拦截操作
+            if (hasGotPhone) {
+                alert('仅可获取一次手机号');
+                return;
+            }
+            // 生成随机手机号（138开头）
+            const mockPhone = '138' + Math.floor(Math.random() * 100000000);
+            phoneInputEl.value = mockPhone;
+            hasGotPhone = true;
+
+            // 剩余次数改为0
+            remainingTimesEl.textContent = '剩余次数 0';
+
+            // 禁用获取按钮（变灰）
+            getPhoneBtnEl.disabled = true;
+            getPhoneBtnEl.style.backgroundColor = '#999';
+
+            // 生成并填充验证码
+            if (!hasGotCode) {
+                const randomCode = Math.floor(100000 + Math.random() * 900000); // 6位随机数
+                smsCodeEl.textContent = randomCode;
+                hasGotCode = true;
+                // 启用复制按钮
+                copyBtnEl.style.backgroundColor = '#3674ff';
+                copyBtnEl.style.cursor = 'pointer';
+                // 提示用户
+                alert('验证码已发送，仅可获取一次');
+            }
+        });
+
+        /**
+         * 3. 点击“复制验证码”按钮事件
+         */
+        copyBtnEl.addEventListener('click', function() {
+            // 未获取验证码，拦截操作
+            if (!hasGotCode) {
+                alert('请先获取手机号与验证码');
+                return;
+            }
+            // 复制验证码到剪贴板
+            navigator.clipboard.writeText(smsCodeEl.innerText)
+                .then(() => {
+                    alert('验证码已复制到剪贴板');
+                })
+                .catch(err => {
+                    console.error('复制失败：', err);
+                    alert('复制失败，请手动选择');
+                });
+        });
+
+        /**
+         * 4. 点击手机号输入框（复制手机号）
+         */
+        phoneInputEl.addEventListener('click', function() {
+            const phone = this.value;
+            // 有手机号且已获取，执行复制
+            if (phone && hasGotPhone) {
+                navigator.clipboard.writeText(phone)
+                    .then(() => {
+                        alert('手机号已复制到剪贴板');
+                    })
+                    .catch(err => {
+                        console.error('复制手机号失败：', err);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
