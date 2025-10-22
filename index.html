@@ -14,7 +14,7 @@
         body {
             background-color: #fff;
         }
-        /* VIP信息区样式 */
+        /* VIP信息区 */
         .vip-section {
             background-color: #3674ff;
             color: #fff;
@@ -31,7 +31,7 @@
             font-size: 14px;
             color: #e0efff;
         }
-        /* 公告区样式 */
+        /* 公告区 */
         .notice-section {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -60,7 +60,7 @@
             color: #666;
             text-decoration: none;
         }
-        /* 手机号区样式 */
+        /* 手机号区 */
         .phone-section {
             padding: 15px;
         }
@@ -81,19 +81,19 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
-            color: #999;
+            color: #333;
             background-color: #f5f5f5;
         }
         .get-btn {
-            background-color: #3674ff;
+            background-color: #999;
             color: #fff;
             border: none;
             padding: 0 20px;
             border-radius: 6px;
             font-size: 14px;
-            cursor: pointer;
+            cursor: not-allowed;
         }
-        /* 提示区样式 */
+        /* 提示区 */
         .tips-section {
             background-color: #f7f9ff;
             border: 1px solid #e0efff;
@@ -121,7 +121,7 @@
         .tips-list li {
             margin-bottom: 5px;
         }
-        /* 短信区样式 */
+        /* 短信验证码区 */
         .sms-section {
             padding: 15px;
         }
@@ -138,7 +138,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            min-height: 60px; /* 空状态保持区域高度 */
+            min-height: 60px;
         }
         .sms-code {
             font-size: 20px;
@@ -146,15 +146,15 @@
             color: #3674ff;
         }
         .copy-btn {
-            background-color: #999; /* 初始禁用状态 */
+            background-color: #999;
             color: #fff;
             border: none;
             padding: 8px 15px;
             border-radius: 6px;
             font-size: 14px;
-            cursor: not-allowed; /* 初始禁用光标 */
+            cursor: not-allowed;
         }
-        /* 底部导航样式 */
+        /* 底部导航 */
         .nav-bar {
             background-color: #f5f5f5;
             padding: 10px 0;
@@ -175,8 +175,8 @@
         <div class="vip-title">剪映会员</div>
         <div class="vip-info">
             <span>卡密类型 天卡</span>
-            <span id="expireTime">到期时间 </span> <!-- 动态到期时间 -->
-            <span id="remainingTimes">剩余次数 1</span> <!-- 剩余次数 -->
+            <span id="expireTime">到期时间 </span>
+            <span id="remainingTimes">剩余次数 1</span>
         </div>
     </div>
 
@@ -190,31 +190,31 @@
         <a href="https://sourl.cn/CrTARJ" class="notice-link" target="_blank">https://sourl.cn/CrTARJ</a>
     </div>
 
-    <!-- 手机号区 -->
+    <!-- 手机号区（固定为15137969626） -->
     <div class="phone-section">
         <div class="phone-title">手机号码</div>
         <div class="phone-input-area">
-            <input type="text" class="phone-input" id="phoneInput" placeholder="请先获取号码" readonly>
-            <button class="get-btn" id="getPhoneBtn">获取/更换</button>
+            <input type="text" class="phone-input" id="phoneInput" value="15137969626" readonly>
+            <button class="get-btn" disabled>号码已固定</button>
         </div>
-        <!-- 温馨提示 -->
+        <!-- 提示区 -->
         <div class="tips-section">
             <div class="tips-header">
                 <span class="tips-icon">ℹ️</span>
                 <span class="tips-title">温馨提示</span>
             </div>
             <ul class="tips-list">
-                <li>点击号码即可自动复制</li>
-                <li>刷新页面可重新继续获取验证码</li>
+                <li>当前手机号：15137969626，点击可复制</li>
+                <li>使用该手机号在第三方获取验证码后，系统将自动接收并填充</li>
             </ul>
         </div>
     </div>
 
-    <!-- 短信内容区 -->
+    <!-- 短信验证码区（初始为空，端口接收后自动填充） -->
     <div class="sms-section">
-        <div class="sms-title">短信内容</div>
+        <div class="sms-title">短信验证码</div>
         <div class="sms-content-area">
-            <span class="sms-code" id="smsCode"></span> <!-- 初始为空，获取后填充验证码 -->
+            <span class="sms-code" id="smsCode">——</span> <!-- 初始为空 -->
             <button class="copy-btn" id="copyBtn">复制验证码</button>
         </div>
     </div>
@@ -226,105 +226,68 @@
     </div>
 
     <script>
-        // 状态变量
-        let hasGotPhone = false; // 是否已获取手机号
-        let hasGotCode = false;  // 是否已获取验证码
         // DOM元素获取
-        const remainingTimesEl = document.getElementById('remainingTimes');
         const expireTimeEl = document.getElementById('expireTime');
+        const remainingTimesEl = document.getElementById('remainingTimes');
         const smsCodeEl = document.getElementById('smsCode');
         const copyBtnEl = document.getElementById('copyBtn');
         const phoneInputEl = document.getElementById('phoneInput');
-        const getPhoneBtnEl = document.getElementById('getPhoneBtn');
 
-        /**
-         * 1. 设置动态到期时间（当前时间+1分钟）
-         */
-        function setDynamicExpireTime() {
+        // 1. 设置动态到期时间（当前时间+1分钟）
+        function setExpireTime() {
             const now = new Date();
-            now.setMinutes(now.getMinutes() + 1); // 时间加1分钟
-            // 格式化时间（补零处理）
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-            const second = String(now.getSeconds()).padStart(2, '0');
-            // 赋值到页面
+            now.setMinutes(now.getMinutes() + 1);
+            const [year, month, day, hour, minute, second] = [
+                now.getFullYear(),
+                String(now.getMonth() + 1).padStart(2, '0'),
+                String(now.getDate()).padStart(2, '0'),
+                String(now.getHours()).padStart(2, '0'),
+                String(now.getMinutes()).padStart(2, '0'),
+                String(now.getSeconds()).padStart(2, '0')
+            ];
             expireTimeEl.textContent = `到期时间 ${year}/${month}/${day} ${hour}:${minute}:${second}`;
         }
-        // 页面加载时执行
-        setDynamicExpireTime();
+        setExpireTime();
 
-        /**
-         * 2. 点击“获取/更换”按钮事件
-         */
-        getPhoneBtnEl.addEventListener('click', function() {
-            // 已获取过手机号，拦截操作
-            if (hasGotPhone) {
-                alert('仅可获取一次手机号');
-                return;
-            }
-            // 生成随机手机号（138开头）
-            const mockPhone = '138' + Math.floor(Math.random() * 100000000);
-            phoneInputEl.value = mockPhone;
-            hasGotPhone = true;
-
-            // 剩余次数改为0
-            remainingTimesEl.textContent = '剩余次数 0';
-
-            // 禁用获取按钮（变灰）
-            getPhoneBtnEl.disabled = true;
-            getPhoneBtnEl.style.backgroundColor = '#999';
-
-            // 生成并填充验证码
-            if (!hasGotCode) {
-                const randomCode = Math.floor(100000 + Math.random() * 900000); // 6位随机数
-                smsCodeEl.textContent = randomCode;
-                hasGotCode = true;
-                // 启用复制按钮
-                copyBtnEl.style.backgroundColor = '#3674ff';
-                copyBtnEl.style.cursor = 'pointer';
-                // 提示用户
-                alert('验证码已发送，仅可获取一次');
-            }
-        });
-
-        /**
-         * 3. 点击“复制验证码”按钮事件
-         */
-        copyBtnEl.addEventListener('click', function() {
-            // 未获取验证码，拦截操作
-            if (!hasGotCode) {
-                alert('请先获取手机号与验证码');
-                return;
-            }
-            // 复制验证码到剪贴板
-            navigator.clipboard.writeText(smsCodeEl.innerText)
-                .then(() => {
-                    alert('验证码已复制到剪贴板');
+        // 2. 真实端口接收逻辑（对接你的网站后端，每3秒拉取一次最新验证码）
+        function fetchSmsCodeFromPort() {
+            // 替换为你的网站后端接口地址（需返回{ code: "6位验证码" }格式）
+            const yourBackendApi = "https://你的网站域名/接口路径?phone=15137969626";
+            
+            fetch(yourBackendApi)
+                .then(res => res.json())
+                .then(data => {
+                    // 接口返回有效验证码时，更新界面
+                    if (data.code && /^\d{6}$/.test(data.code)) {
+                        smsCodeEl.textContent = data.code;
+                        // 启用复制按钮
+                        copyBtnEl.style.backgroundColor = '#3674ff';
+                        copyBtnEl.style.cursor = 'pointer';
+                        // 更新剩余次数为0
+                        remainingTimesEl.textContent = '剩余次数 0';
+                        // 停止继续拉取（避免重复更新）
+                        clearInterval(fetchInterval);
+                    }
                 })
-                .catch(err => {
-                    console.error('复制失败：', err);
-                    alert('复制失败，请手动选择');
-                });
+                .catch(err => console.log('端口拉取验证码失败：', err));
+        }
+
+        // 启动端口拉取（每3秒查询一次，直到获取到验证码）
+        const fetchInterval = setInterval(fetchSmsCodeFromPort, 3000);
+
+        // 3. 复制验证码功能
+        copyBtnEl.addEventListener('click', () => {
+            const code = smsCodeEl.textContent;
+            if (code === '——') {
+                alert('请等待验证码接收');
+                return;
+            }
+            navigator.clipboard.writeText(code).then(() => alert('验证码已复制')).catch(err => alert('复制失败，请手动选择'));
         });
 
-        /**
-         * 4. 点击手机号输入框（复制手机号）
-         */
-        phoneInputEl.addEventListener('click', function() {
-            const phone = this.value;
-            // 有手机号且已获取，执行复制
-            if (phone && hasGotPhone) {
-                navigator.clipboard.writeText(phone)
-                    .then(() => {
-                        alert('手机号已复制到剪贴板');
-                    })
-                    .catch(err => {
-                        console.error('复制手机号失败：', err);
-                    });
-            }
+        // 4. 复制手机号功能
+        phoneInputEl.addEventListener('click', () => {
+            navigator.clipboard.writeText(phoneInputEl.value).then(() => alert('手机号已复制')).catch(err => alert('复制失败'));
         });
     </script>
 </body>
